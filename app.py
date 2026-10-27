@@ -79,11 +79,13 @@ def predict_stress(model, text):
     return label, score
 
 
+
 def predict_emotions(model, labels, text):
     if not hasattr(model, "predict"):
         return []
 
     prediction = model.predict([text])
+
     if hasattr(prediction, "toarray"):
         prediction = prediction.toarray()
 
@@ -91,10 +93,26 @@ def predict_emotions(model, labels, text):
     results = []
 
     for i, value in enumerate(values):
-        if i < len(labels):
-            results.append((str(labels[i]), float(value)))
+        if i >= len(labels):
+            continue
 
-    return sorted(results, key=lambda x: x[1], reverse=True)[:8]
+        try:
+            score = float(value)
+        except (TypeError, ValueError):
+            continue
+
+        if score > 0:
+            results.append({
+                "label": str(labels[i]),
+                "score": score
+            })
+
+    return sorted(
+        results,
+        key=lambda item: item["score"],
+        reverse=True
+    )[:5]
+
 
 
 try:
