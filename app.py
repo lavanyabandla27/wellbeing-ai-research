@@ -157,11 +157,19 @@ if st.button("Analyze Text", type="primary"):
             label, score = predict_stress(stress_model, text)
 
             st.markdown("### Stress Analysis")
+
             st.write(f"Predicted label: {label}")
             st.write(
                 "Stress score: "
                 + (f"{score:.4f}" if score is not None else "Unavailable")
             )
+            
+            if score is not None and abs(score - 0.5) <= 0.10:
+                st.warning(
+                    "This prediction is near the decision threshold and should "
+                    "be interpreted cautiously. The model may be incorrect."
+                )
+
             st.caption(
                 "The score is not a calibrated probability or diagnosis."
             )
