@@ -170,25 +170,28 @@ if st.button("Analyze Text", type="primary"):
                 emotion_model, emotion_labels, text
             )
 
+
             st.markdown("### Emotion Predictions")
+            
             if emotions:
-                st.json([
-                    {"label": name, "score": score}
-                    for name, score in emotions
-                ])
-
-                names = [x[0] for x in emotions][::-1]
-                scores = [x[1] for x in emotions][::-1]
-
+                st.json(emotions)
+            
+                # Each emotion is a dictionary: {"label": ..., "score": ...}
+                names = [item["label"] for item in emotions][::-1]
+                scores = [item["score"] for item in emotions][::-1]
+            
                 fig, ax = plt.subplots(figsize=(8, 4))
                 ax.barh(names, scores)
-                ax.set_xlabel("Model output score")
+                ax.set_xlabel("Model output score (not calibrated probability)")
                 ax.set_title("Predicted Emotion Labels")
+                ax.grid(axis="x", alpha=0.25)
                 fig.tight_layout()
+            
                 st.pyplot(fig)
                 plt.close(fig)
             else:
                 st.info("No emotion scores were available.")
+
 
             st.markdown("### Evidence Resources")
             st.caption(
