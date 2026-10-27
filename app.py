@@ -80,31 +80,40 @@ def predict_stress(model, text):
 
 
 
+
 def predict_emotions(model, labels, text):
-    if not hasattr(model, "predict"):
-        return []
-
-    prediction = model.predict([text])
-
-    if hasattr(prediction, "toarray"):
-        prediction = prediction.toarray()
-
-    values = prediction[0]
     results = []
 
-    for i, value in enumerate(values):
-        if i >= len(labels):
-            continue
+    # Prefer the model's underlying score outputs when available.
+    if hasattr(model, "predict_proba"):
+        raw = model.predict_proba([text])
 
-        try:
-            score = float(value)
-        except (TypeError, ValueError):
-            continue
+        # Some multilabel estimators return one array per label.
+        if isinstance(raw, list):
+            scores = []
+            for item in raw:
+                arr = item[0]
+                if len(arr) > 1:
+                    scores.append(float(arr[1]))
+                else:
+                    scores.append(float(arr[0]))
+        else:
+            raw = raw.toarray() if hasattr(raw, "toarray") else raw
+            scores = list(raw[0])
 
-        if score > 0:
+    elif hasattr(model, "decision_function"):
+        raw = model.decision_function([text])
+        raw = raw.toarray() if hasattr(raw, "toarray") else raw
+        scores = list(raw[0]) if getattr(raw, "ndim", 1) > 1 else list(raw)
+
+    else:
+        return []
+
+    for i, score in enumerate(scores):
+        if i < len(labels):
             results.append({
                 "label": str(labels[i]),
-                "score": score
+                "score": float(score)
             })
 
     return sorted(
@@ -112,6 +121,7 @@ def predict_emotions(model, labels, text):
         key=lambda item: item["score"],
         reverse=True
     )[:5]
+
 
 
 
