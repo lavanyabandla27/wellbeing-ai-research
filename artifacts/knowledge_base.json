@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "title": "WHO: Doing What Matters in Times of Stress",
+    "text": "World Health Organization practical stress guide covering grounding, difficult thoughts, values, and making room for difficult feelings.",
+    "url": "https://www.who.int/publications/i/item/9789240003927"
+  },
+  {
+    "title": "NHS: Every Mind Matters",
+    "text": "NHS guidance on managing stress, mental wellbeing, and finding support.",
+    "url": "https://www.nhs.uk/every-mind-matters/"
+  },
+  {
+    "title": "NIMH: Caring for Your Mental Health",
+    "text": "National Institute of Mental Health guidance on mental well-being and self-care, including physical activity, regular meals, hydration, sleep, relaxation, setting priorities, gratitude, and staying connected with others.",
+    "url": "https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health"
+  },
+  {
+    "title": "CDC: Managing Stress",
+    "text": "Centers for Disease Control and Prevention guidance about everyday stress, the effects of long-term stress, daily stress management, and seeking additional support when stress becomes difficult to manage.",
+    "url": "https://www.cdc.gov/mental-health/living-with/index.html"
+  },
+  {
+    "title": "WHO: Guideline on Self-Care Interventions for Health and Well-Being",
+    "text": "World Health Organization guideline on self-care interventions as part of health and well-being. This is a broad guideline rather than a personalized treatment plan.",
+    "url": "https://www.who.int/publications/i/item/9789240052192"
+  }
+]
