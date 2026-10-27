@@ -193,11 +193,102 @@ if st.button("Analyze Text", type="primary"):
                 st.info("No emotion scores were available.")
 
 
+
             st.markdown("### Evidence Resources")
-            st.caption(
-                "Resource relevance must be checked before showing a link. "
-                "This starter version does not yet run your original retriever."
+            
+            # Load and search the project's knowledge base using TF-IDF
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.metrics.pairwise import cosine_similarity
+            
+            @st.cache_data
+            def build_knowledge_index(resources):
+                documents = []
+            
+                for item in resources:
+                    title = str(item.get("title", ""))
+                    description = str(
+                        item.get("description", item.get("summary", ""))
+                    )
+                    documents.append(f"{title} {description}".strip())
+            
+                vectorizer = TfidfVectorizer(
+                    ngram_range=(1, 2),
+                    sublinear_tf=True
+                )
+                matrix = vectorizer.fit_transform(documents)
+            
+                return vectorizer, matrix
+            
+            
+            def retrieve_resources(text, resources, top_k=2, min_similarity=0.03):
+                if not resources:
+                    return []
+            
+                try:
+                    vectorizer, matrix = build_knowledge_index(resources)
+                    query_vector = vectorizer.transform([text])
+                    similarities = cosine_similarity(query_vector, matrix)[0]
+            
+                    ranked = similarities.argsort()[::-1]
+                    results = []
+            
+                    for index in ranked:
+                        score = float(similarities[index])
+            
+                        if score < min_similarity:
+                            continue
+            
+                        item = resources[index]
+                        url = str(item.get("url", "")).strip()
+            
+                        if not url.startswith(("https://", "http://")):
+                            continue
+            
+                        results.append({
+                            "title": item.get("title", "Well-being resource"),
+                            "url": url,
+                            "similarity": score
+                        })
+            
+                        if len(results) >= top_k:
+                            break
+            
+                    return results
+            
+                except Exception as exc:
+                    st.warning(f"Evidence retrieval could not run: {exc}")
+                    return []
+            
+            
+            # Avoid displaying resources for clearly positive or relaxed text
+            positive_patterns = [
+                r"\bhappy\b",
+                r"\bproud\b",
+                r"\bexcited\b",
+                r"\bfeel relaxed\b",
+                r"\bfeeling relaxed\b",
+                r"\brelaxed now\b"
+            ]
+            
+            suppress_resources = any(
+                re.search(pattern, text, flags=re.IGNORECASE)
+                for pattern in positive_patterns
             )
+            
+            if suppress_resources:
+                st.info("No additional resource was shown for this input.")
+            else:
+                retrieved = retrieve_resources(text, knowledge_base)
+            
+                if retrieved:
+                    for resource in retrieved:
+                        st.markdown(
+                            f"- [{resource['title']}]({resource['url']}) "
+                            f"— retrieval similarity: {resource['similarity']:.3f}"
+                        )
+                else:
+                    st.info("No sufficiently relevant resource was found.")
+
 
         except Exception as exc:
             st.error("Analysis failed. Check model compatibility.")
